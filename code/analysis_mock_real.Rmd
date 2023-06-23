@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+author: "Marco-Felipe King"
+date: "2023-06-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+df <- vroom::vroom("MockVsActual_GithubDOI.csv")
+```
+
+
+```{r}
+data <- df %>% 
+  group_by(ActivityID,type) %>% 
+  slice(c(1,n())) %>% 
+  mutate(time=lubridate::dmy_hm(Time)) %>% 
+  summarise(diff_time=time-lag(time)) %>% 
+  drop_na()
+
+write.csv(data,"time_data.csv",row.names = FALSE)
+```
+
+```{r}
+require(ggplot2)
+
+data %>% 
+  ggplot()+
+  geom_violin(aes(x=type,y=diff_time,fill=type),draw_quantiles = c(.25,.5,.75))+
+  scale_fill_brewer(palette = "Set1")+
+  # scale_fill_discrete(title="Type")+
+  coord_flip()+
+  hrbrthemes::theme_ipsum()+
+  xlab(" ")+
+  ylab("Seconds")
+```
+
