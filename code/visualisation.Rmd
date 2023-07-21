@@ -1,0 +1,44 @@
+---
+title: "Contact_plots"
+author: "MFK"
+date: "2023-07-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+pacman::p_load(dplyr,ggplot2,networkD3)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r import transitions}
+df <- vroom::vroom("data/transitions.csv")
+```
+
+## Data Prep
+
+You can also embed plots, for example:
+
+```{r data prep, echo=FALSE}
+# Create a list of unique nodes
+nodes <- data.frame(name = unique(c(df$Source, df$Target)))
+
+# Add an index column to the nodes data frame
+nodes$ID <- seq(from = 0, to = nrow(nodes) - 1)
+
+# Replace the source and target names in df with their corresponding indices in nodes
+df$Source <- match(df$Source, nodes$name) - 1
+df$Target <- match(df$Target, nodes$name) - 1
+```
+
+```{r plot sankey}
+# Create the Sankey diagram
+sankeyNetwork(Links = df, Nodes = nodes, Source = 'Source', Target = 'Target', Value = 'Count', NodeID = 'name')
+```
+
